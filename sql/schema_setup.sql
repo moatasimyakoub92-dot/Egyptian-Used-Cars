@@ -33,11 +33,14 @@ CREATE TABLE IF NOT EXISTS used_cars (
     model_max_price NUMERIC(15, 2),
     is_zero_km BOOLEAN DEFAULT FALSE,
     mileage_suspect BOOLEAN DEFAULT FALSE,
-    fuel_engine_conflict BOOLEAN DEFAULT FALSE
+    fuel_engine_conflict BOOLEAN DEFAULT FALSE,
+    engine_imputed BOOLEAN DEFAULT FALSE,
+    brand_origin VARCHAR(100)
 );
 
 -- Indexes for performance optimization
 CREATE INDEX idx_cars_brand_model ON used_cars(brand, model);
+CREATE INDEX idx_cars_brand_origin ON used_cars(brand_origin);
 CREATE INDEX idx_cars_year ON used_cars(year);
 CREATE INDEX idx_cars_price ON used_cars(price);
 CREATE INDEX idx_cars_brand_tier ON used_cars(brand_tier);

@@ -50,6 +50,8 @@ data/
 | **is_zero_km** | `boolean` | Flag indicating brand-new / unregistered inventory ($0\text{ km}$). |
 | **mileage_suspect** | `boolean` | Anomaly flag for odometer rollback or unrealistic annual mileage. |
 | **fuel_engine_conflict**| `boolean` | Data integrity flag for contradictory fuel & engine specifications. |
+| **engine_imputed** | `boolean` | Data imputation flag denoting displacement filled from trim/spec lookup. |
+| **Brand_Origin** | `string` | Manufacturer country of origin (e.g., Germany, Japan, China, Egypt). |
 
 ---
 

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Egyptian Used Cars - EDA & Visual Intelligence</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 1200px; margin: 0 auto; padding: 30px 20px; background-color: #ffffff; }
+        h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 30px; font-size: 26px; }
+        h2 { color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 35px; font-size: 20px; }
+        h3 { color: #0d9488; margin-top: 25px; font-size: 17px; }
+        p, li { font-size: 14px; color: #334155; }
+        .chart-container { margin: 25px 0 35px 0; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; padding: 12px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 13.5px; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+        th { background-color: #f1f5f9; color: #0f172a; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        blockquote { border-left: 4px solid #3b82f6; margin: 15px 0; padding: 10px 18px; background-color: #eff6ff; color: #1e40af; border-radius: 0 4px 4px 0; }
+        @media print {
+            body { max-width: 100%; padding: 0; }
+            .chart-container { page-break-inside: avoid; box-shadow: none; border: 1px solid #cbd5e1; margin: 15px 0; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="markdown-cell"><h1>🚗 Egyptian Used Cars Market Intelligence: Exploratory Data Analysis &amp; Visualization</h1>
+<p><strong>Comprehensive EDA &amp; Interactive Visual Analytics on 23,535 Egyptian Secondary Car Market Listings</strong></p>
+<hr />
+<h2>📌 Executive Overview</h2>
+<p>The Egyptian automotive market presents a distinct macroeconomic environment shaped by heavy import tariffs, foreign currency adjustments, and structural supply bottlenecks. In this landscape, automobiles frequently serve as both essential transportation assets and inflation-hedging financial stores of value.</p>
+<p>This notebook provides an exhaustive, publication-grade <strong>Exploratory Data Analysis (EDA)</strong> and <strong>interactive visual analytics suite</strong> built with <strong>Plotly</strong>, <strong>Seaborn</strong>, and <strong>Pandas</strong>.</p>
+<h3>Key Technical Standards Adhered To:</h3>
+<ul>
+<li><strong>Interactive First</strong>: Interactive Plotly visualizations with customized hover templates, tooltips, and responsive layout styling.</li>
+<li><strong>Consistent Theming</strong>: Professional slate/navy and corporate colorway (<code>#1E3A8A</code>, <code>#0D9488</code>, <code>#F59E0B</code>, <code>#DC2626</code>, <code>#8B5CF6</code>).</li>
+<li><strong>Currency &amp; Metric Formatting</strong>: All financial values are formatted in <strong>Egyptian Pounds (EGP)</strong> with thousands separators.</li>
+<li><strong>Analytical Rigor</strong>: Skewness correction via logarithmic scales, non-parametric median metrics, and data quality audits without arbitrary outlier deletion.</li>
+<li><strong>Streamlit Ready</strong>: Standalone HTML export module saving all charts to <code>html_charts/</code> for immediate dashboard integration.</li>
+</ul>
+<hr />
+<h3>📑 Table of Contents</h3>
+<ol>
+<li><a href="#1-setup-custom-plotly-theming--helper-functions">Setup, Custom Plotly Theming &amp; Helper Functions</a></li>
+<li><a href="#2-data-ingestion--integrity-audit">Data Ingestion &amp; Integrity Audit</a></li>
+<li><a href="#section-a-market-overview">Section A: Market Overview</a><ul>
+<li><a href="#a1-market-kpi-summary-cards">A1. Market KPI Dashboard</a></li>
+<li><a href="#a2-price-distribution-linear-vs-logarithmic">A2. Price Distribution (Linear vs. Logarithmic Skew)</a></li>
+<li><a href="#a3-top-15-brands-by-listing-volume">A3. Top 15 Brands by Listing Volume</a></li>
+<li><a href="#a4-body-shape-distribution">A4. Body Shape Distribution</a></li>
+<li><a href="#a5-fuel-type--transmission-cross-distribution">A5. Fuel Type &amp; Transmission Cross-Distribution</a></li>
+<li><a href="#a6-manufacturing-year-distribution--fleet-vintage">A6. Manufacturing Year Distribution &amp; Fleet Vintage</a></li>
+</ul>
+</li>
+<li><a href="#section-b-deep-dive-price-analysis">Section B: Deep-Dive Price Analysis</a><ul>
+<li><a href="#b1-median-price-by-top-15-brands">B1. Median Price by Top 15 Brands</a></li>
+<li><a href="#b2-mileage-vs-price-interactive-scatter-plot">B2. Mileage vs. Price (Interactive Scatter Plot)</a></li>
+<li><a href="#b3-car-age-vs-price-depreciation-dynamics">B3. Car Age vs. Price (Depreciation Dynamics)</a></li>
+<li><a href="#b4-price-distribution-by-vehicle-condition">B4. Price Distribution by Vehicle Condition</a></li>
+<li><a href="#b5-price-distribution-by-body-shape">B5. Price Distribution by Body Shape</a></li>
+<li><a href="#b6-price-vs-horsepower">B6. Price vs. Horsepower</a></li>
+<li><a href="#b7-brand-tier-vs-price">B7. Brand Tier vs. Price</a></li>
+</ul>
+</li>
+<li><a href="#section-c-brand--model-intelligence">Section C: Brand &amp; Model Intelligence</a><ul>
+<li><a href="#c1-top-20-car-models-by-listing-volume">C1. Top 20 Car Models by Listing Volume</a></li>
+<li><a href="#c2-brand-market-share--hierarchy-treemap">C2. Brand Market Share &amp; Hierarchy (Treemap)</a></li>
+<li><a href="#c3-brand-vs-body-shape-heatmap">C3. Brand vs. Body Shape Heatmap</a></li>
+<li><a href="#c4-intra-brand-model-price-comparison-mercedes-benz-case-study">C4. Intra-Brand Model Price Comparison (Mercedes-Benz Case Study)</a></li>
+</ul>
+</li>
+<li><a href="#section-d-vehicle-technical-specifications">Section D: Vehicle Technical Specifications</a><ul>
+<li><a href="#d1-mileage-distribution--odometer-reporting-clusters">D1. Mileage Distribution &amp; Odometer Reporting Clusters</a></li>
+<li><a href="#d2-annual-mileage-km_per_year-distribution">D2. Annual Mileage (<code>km_per_year</code>) Distribution</a></li>
+<li><a href="#d3-engine-capacity-vs-horsepower">D3. Engine Capacity vs. Horsepower (Displacement Downsizing &amp; Turbocharging)</a></li>
+<li><a href="#d4-horsepower-distribution--power-brackets">D4. Horsepower Distribution &amp; Power Brackets</a></li>
+<li><a href="#d5-fuel-type-distribution-across-body-shapes">D5. Fuel Type Distribution Across Body Shapes</a></li>
+</ul>
+</li>
+<li><a href="#section-e-vehicle-condition--data-quality-diagnostics">Section E: Vehicle Condition &amp; Data Quality Diagnostics</a><ul>
+<li><a href="#e1-vehicle-condition-distribution">E1. Vehicle Condition Distribution</a></li>
+<li><a href="#e2-condition-score-010-scale-distribution">E2. Condition Score (0–10 Scale) Distribution</a></li>
+<li><a href="#e3-condition-vs-price-dynamics">E3. Condition vs. Price Dynamics</a></li>
+<li><a href="#e4-data-quality--anomaly-diagnostic-summary">E4. Data Quality &amp; Anomaly Diagnostic Summary</a></li>
+</ul>
+</li>
+<li><a href="#section-f-global-geographic-intelligence-brand-origins--regional-dynamics">Section F: Global Geographic Intelligence (Brand Origins)</a><ul>
+<li><a href="#chart-f1-global-origin-market-share-donut-chart">F1. Global Origin Market Share (Donut Chart)</a></li>
+<li><a href="#chart-f2-median-price-by-country-of-origin-horizontal-bar-chart">F2. Median Price by Country of Origin</a></li>
+<li><a href="#chart-f3-body-style-preferences-across-major-origins">F3. Body Style Preferences by Origin</a></li>
+<li><a href="#chart-f4-fleet-age--modernity-by-country-of-origin">F4. Fleet Age &amp; Modernity by Origin</a></li>
+</ul>
+</li>
+<li><a href="#section-g-executive-summary--strategic-findings">Section G: Executive Summary &amp; Strategic Findings</a></li>
+<li><a href="#automated-html-export-verification">Automated HTML Export Verification</a></li>
+</ol>
+</div>
+<div class="markdown-cell"><h2>1. Setup, Custom Plotly Theming &amp; Helper Functions</h2>
+<p>We import the analytical libraries, configure unified visual themes, and establish an automated export pipeline that writes every interactive chart to standalone HTML for dashboard integration.</p>
+</div>
+<div class="markdown-cell"><h2>2. Data Ingestion &amp; Integrity Audit</h2>
+<p>We load the curated dataset <code>used_cars_cleaned.csv</code> and inspect its shape, columns, and data distributions.</p>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section A: Market Overview</h1>
+<p>In this section, we establish macro market benchmarks: listing volumes, central price tendencies, manufacturer shares, body shapes, transmission adoption, and vehicle age demographics.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A1):</strong></p>
+<ul>
+<li><strong>Macro Scale</strong>: The dataset captures 23,535 verified vehicles spanning 109 global brands and 862 distinct vehicle models, representing broad coverage across Egypt's secondary car market.</li>
+<li><strong>Central Tendency Skew</strong>: The median price stands at <strong>700,000 EGP</strong>, whereas the arithmetic mean is <strong>1,326,711 EGP</strong> (nearly <strong>89.5% higher</strong>). This extreme divergence underscores why median metrics must be prioritized: luxury exotics heavily bias parametric averages.</li>
+<li><strong>Fleet Vintage</strong>: The average vehicle age is <strong>11.2 years</strong> (median 9.0 years), reflecting high vehicle longevity and extended replacement cycles in Egypt.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A2):</strong></p>
+<ul>
+<li><strong>Severe Positive Skew</strong>: Advertised vehicle prices span from 50,000 EGP to 36,000,000 EGP with extreme positive skewness (&gt;7.2). The vast majority (75%) of vehicles trade below 1,285,000 EGP.</li>
+<li><strong>Parametric Normalization</strong>: As illustrated in the right panel, applying a $\log_{10}$ transformation converts the distribution into a near-perfect Gaussian bell curve centered around $\log_{10}(\text{Price}) \approx 5.85$ ($\approx 700,000$ EGP). This confirms that statistical modeling and regressions require log-linear price modeling.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A3):</strong></p>
+<ul>
+<li><strong>Market Leadership</strong>: <strong>Mercedes-Benz</strong> unexpectedly ranks #1 by secondary listing volume with 2,319 listings (9.85%), closely followed by <strong>Hyundai</strong> (1,876, 7.97%), <strong>Kia</strong> (1,648, 7.00%), <strong>BMW</strong> (1,509, 6.41%), and <strong>Renault</strong> (1,502, 6.38%).</li>
+<li><strong>Volume Concentration</strong>: The top 5 brands control 37.6% of all listings, while the top 15 brands account for 71.9% of total market supply.</li>
+<li><strong>Luxury Liquidity</strong>: The disproportionate volume of German luxury brands (Mercedes-Benz and BMW collectively accounting for &gt;16% of listings) highlights the active secondary trade of prestige vehicles used by affluent Egyptians as capital preservation assets.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A4):</strong></p>
+<ul>
+<li><strong>Sedan Supremacy</strong>: <strong>Sedans</strong> account for an absolute majority of the secondary fleet at <strong>56.6% (13,316 listings)</strong>, driven by family commuting, commercial rideshare utility, and affordable maintenance.</li>
+<li><strong>SUV Expansion</strong>: <strong>SUVs</strong> represent the second largest segment with <strong>24.8% (5,845 listings)</strong>. SUVs have captured substantial market share over the last decade due to road condition preferences and higher ground clearance.</li>
+<li><strong>Hatchbacks &amp; Niches</strong>: <strong>Hatchbacks</strong> form <strong>13.4%</strong> of listings (popular among urban commuters and female drivers), while specialized shapes (Coupes, Convertibles, 4X4s, Vans, Trucks) make up the remaining 5.2%.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A5):</strong></p>
+<ul>
+<li><strong>Automatic Dominance</strong>: Overall, <strong>Automatic transmission</strong> commands <strong>81.9% (19,278 listings)</strong> of the market, while <strong>Manual</strong> accounts for <strong>18.1% (4,257 listings)</strong>. This is a direct consequence of heavy Cairo congestion encouraging automatic gearboxes.</li>
+<li><strong>Fuel Composition</strong>: Gasoline/Petrol is overwhelming (95.3% of all listings). Diesel (674 listings) is primarily restricted to commercial vans and heavy pickups. Electric (213 listings) and Hybrid (212 listings) are emerging high-end segments; notably, 100% of Electric and Hybrid vehicles are automatic.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart A6):</strong></p>
+<ul>
+<li><strong>Modern Fleet Peak</strong>: Listings peak heavily between manufacturing years <strong>2016 and 2021</strong>, which represents the sweet spot of primary ownership cycle turnover (cars aged 5 to 10 years).</li>
+<li><strong>Macroeconomic Supply Shock</strong>: Listings for model years 2023–2024 decline sharply compared to pre-crisis volumes. This reflects the severe foreign currency crisis, letter-of-credit (LC) restrictions, and the near-freezing of new automobile import quotas between 2022 and 2024.</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section B: Deep-Dive Price Analysis</h1>
+<p>Price analysis forms the analytical core of this study. Due to severe positive skewness and macroeconomic pricing dynamics, all comparisons use non-parametric medians, logarithmic transformations, and multi-variable hover diagnostics.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B1):</strong></p>
+<ul>
+<li><strong>12x Valuation Spread</strong>: Among the top 15 highest-volume brands, median valuations span an order of magnitude: from <strong>1,850,000 EGP for BMW</strong> and <strong>1,650,000 EGP for Mercedes-Benz</strong> down to <strong>200,000 EGP for Daewoo</strong> and <strong>155,000 EGP for Fiat</strong>.</li>
+<li><strong>European Mid-Premium Tier</strong>: European volume brands like <strong>Skoda (885,000 EGP)</strong> and <strong>Peugeot (850,000 EGP)</strong> command a distinct price premium over Asian mass-market rivals like <strong>Toyota (680,000 EGP)</strong> and <strong>Hyundai (580,000 EGP)</strong>.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B2):</strong></p>
+<ul>
+<li><strong>Non-Linear Mileage Decay</strong>: Vehicle price decays rapidly as mileage increases from 0 to 80,000 km. However, beyond 150,000 km, the price degradation flattens noticeably. In Egypt, once a car reaches high mileage, its price is anchored by its baseline physical utility and spare-parts salvage value.</li>
+<li><strong>Condition Clustering</strong>: Vehicles rated &quot;Excellent&quot; (purple) and &quot;Very Good&quot; (green) occupy the upper-left quadrant (low mileage, high price), while &quot;Fair&quot; and &quot;Poor&quot; populate the lower-right plateau.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B3):</strong></p>
+<ul>
+<li><strong>The Egyptian Depreciation Paradox</strong>: Unlike mature Western economies where vehicle values continuously depreciate down toward scrap value, Egypt exhibits a distinct depreciation curve:<ol>
+<li><strong>Years 0 to 5</strong>: Steep initial depreciation as the new-car showroom premium dissipates.</li>
+<li><strong>Years 6 to 15</strong>: Gradual decline with strong price resilience.</li>
+<li><strong>Years 15+</strong>: Long horizontal price floor where nominal vehicle prices stay flat or even appreciate in EGP due to high domestic inflation and currency devaluations.</li>
+</ol>
+</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B4):</strong></p>
+<ul>
+<li><strong>Monotonic Price Tiering</strong>: Condition ratings exhibit clean, monotonically increasing valuation thresholds:<ul>
+<li><strong>Poor</strong>: Median = <strong>250,000 EGP</strong></li>
+<li><strong>Fair</strong>: Median = <strong>430,000 EGP</strong> (+72%)</li>
+<li><strong>Good</strong>: Median = <strong>730,000 EGP</strong> (+70%)</li>
+<li><strong>Very Good</strong>: Median = <strong>1,400,000 EGP</strong> (+92%)</li>
+<li><strong>Excellent</strong>: Median = <strong>2,200,000 EGP</strong> (+57%)</li>
+</ul>
+</li>
+<li><strong>Condition-Age Interplay</strong>: High condition ratings (&quot;Very Good&quot; and &quot;Excellent&quot;) correlate strongly with newer vehicles (&lt;6 years old) equipped with factory paint and dealership service records.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B5):</strong></p>
+<ul>
+<li><strong>Lifestyle &amp; Luxury Premiums</strong>: <strong>Coupes</strong> (median <strong>1.85M EGP</strong>), <strong>Convertibles</strong> (median <strong>1.55M EGP</strong>), and <strong>SUVs</strong> (median <strong>1.25M EGP</strong>) occupy the highest valuation brackets.</li>
+<li><strong>Volume Commuter Segment</strong>: <strong>Sedans</strong> (median <strong>640,000 EGP</strong>) and <strong>Hatchbacks</strong> (median <strong>550,000 EGP</strong>) anchor the mass market, offering the most accessible entry points for Egyptian households.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B6):</strong></p>
+<ul>
+<li><strong>Displacement &amp; Power Thresholds</strong>: Vehicles clustered below 150 HP dominate the mainstream volume (Tier 3 and 4) with prices largely below 1,000,000 EGP. This aligns with Egypt's customs taxation system, where engine displacements under 1,600 cc benefit from lower customs duty.</li>
+<li><strong>High-Output Exponential Premium</strong>: Beyond 200 HP, vehicles are almost exclusively Tier 1 and Tier 2 luxury marques (BMW, Mercedes-Benz, Porsche), where valuations scale rapidly from 2.5M to over 20M EGP.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart B7):</strong></p>
+<ul>
+<li><strong>Stratified Wealth Brackets</strong>: The 4-tier taxonomy displays crystal-clear segmentation:<ul>
+<li><strong>Tier 1 (Ultra-Luxury / Exotic)</strong>: Median <strong>13,000,000 EGP</strong> (Rolls-Royce, Bentley, Ferrari, Lamborghini).</li>
+<li><strong>Tier 2 (Prestige / Luxury)</strong>: Median <strong>2,405,000 EGP</strong> (BMW, Mercedes-Benz, Audi, Porsche, Land Rover).</li>
+<li><strong>Tier 3 (Mainstream / Volume)</strong>: Median <strong>640,000 EGP</strong> (Toyota, Hyundai, Kia, Nissan, Chery, Renault).</li>
+<li><strong>Tier 4 (Economy / Legacy)</strong>: Median <strong>270,000 EGP</strong> (Daewoo, Fiat, Lada, Geely, Speranza).</li>
+</ul>
+</li>
+<li>The Tier 1 median represents a <strong>48x multiplier</strong> over Tier 4, quantifying the vast economic dispersion in Egyptian used automobile pricing.</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section C: Brand &amp; Model Intelligence</h1>
+<p>This section examines individual nameplates, competitive market shares, brand body-style specialization, and intra-brand model hierarchies.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart C1):</strong></p>
+<ul>
+<li><strong>The Pillars of Secondary Liquidity</strong>:<ul>
+<li><strong>Mercedes-Benz C 180</strong> ranks #1 overall with <strong>616 listings</strong> (2.6%), establishing it as the single most liquid luxury vehicle in Egypt.</li>
+<li><strong>Nissan Sunny</strong> follows closely at #2 with <strong>565 listings</strong> (2.4%), representing Egypt's quintessential family and fleet commuter.</li>
+<li><strong>Hyundai Elantra</strong> (502 listings), <strong>Mitsubishi Lancer</strong> (484 listings), and <strong>Toyota Corolla</strong> (479 listings) round out the top 5.</li>
+</ul>
+</li>
+<li>These top 20 models constitute nearly 32% of all secondary transactions, offering highest resale velocity and lowest liquidity risk for buyers and dealers.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart C2):</strong></p>
+<ul>
+<li><strong>Hierarchical Market Topology</strong>: The treemap immediately visualizes market share via box size and pricing echelon via color saturation.</li>
+<li><strong>Volume Clusters</strong>: Mercedes-Benz and BMW form massive dark-blue blocks (high price, high volume), while Hyundai, Renault, Nissan, and Chevrolet form large lighter-blue blocks (mass market, moderate price).</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart C3):</strong></p>
+<ul>
+<li><strong>Specialization Profiles</strong>:<ul>
+<li><strong>Sedan Concentration</strong>: Nissan (1,012 sedans), Hyundai (1,299 sedans), and Chevrolet (961 sedans) focus predominantly on sedans.</li>
+<li><strong>Dual-Pillar Luxury</strong>: Mercedes-Benz and BMW maintain balanced leadership across both Executive Sedans (1,671 and 1,029 listings) and Premium SUVs (397 and 365 listings).</li>
+<li><strong>Hatchback Niches</strong>: Renault (437 hatchbacks) and Fiat (255 hatchbacks) have carved out strong defensive positions in compact urban hatchbacks.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart C4):</strong></p>
+<ul>
+<li><strong>Portfolio Hierarchy</strong>: Within Mercedes-Benz alone, median valuations demonstrate clear stepwise escalation:<ul>
+<li><strong>Entry Luxury</strong>: Compact crossovers like <strong>GLA 200 (1.65M EGP)</strong> and sedans like <strong>C 180 (1.45M EGP)</strong> serve as the entry gate to the brand.</li>
+<li><strong>Executive Mid-Tier</strong>: The <strong>E 200 (2.50M EGP)</strong> and <strong>C 200 (2.35M EGP)</strong> command a substantial 60–70% premium over the C 180.</li>
+<li><strong>Prestige Flagships</strong>: Mid-size luxury SUVs like <strong>GLC 200 (3.20M EGP)</strong> and full-size executive flagships command the upper ceiling of the portfolio.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section D: Vehicle Technical Specifications</h1>
+<p>We analyze physical vehicle attributes: odometer distributions, reporting anomalies, annual utilization rates (<code>km_per_year</code>), engine displacement vs. horsepower efficiency, and powertrain fuel distribution.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart D1):</strong></p>
+<ul>
+<li><strong>Median Mileage</strong>: The median Egyptian used vehicle has accumulated <strong>120,000 km</strong> on its odometer.</li>
+<li><strong>Cognitive Rounding Bias</strong>: Visible vertical spikes appear exactly at <strong>100,000 km</strong>, <strong>150,000 km</strong>, and <strong>200,000 km</strong>. This is a classic behavioral heuristic where sellers report estimated round numbers rather than exact digital odometer readings.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart D2):</strong></p>
+<ul>
+<li><strong>Standard Utilization Rate</strong>: The median annual driving distance in Egypt is <strong>13,000 km/year</strong>, with the core 50% interquartile range falling between <strong>8,500 km/yr and 18,000 km/yr</strong>.</li>
+<li><strong>Fraud Detection Utility</strong>: Vehicles registering under <strong>3,000 km/yr</strong> on older models or over <strong>35,000 km/yr</strong> serve as immediate red flags for odometer rollbacks or undisclosed commercial rideshare operation.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart D3):</strong></p>
+<ul>
+<li><strong>Elimination of Discrete Overplotting</strong>: Automotive engine displacements are manufactured in standardized nominal batches (1.0L, 1.2L, 1.4L, 1.6L, 2.0L, etc.). Grouping vehicles into clear displacement classes completely eliminates the vertical stripe artifact of raw scatter plots and exposes the true statistical distribution.</li>
+<li><strong>The 1,600 cc Tax Sweet Spot</strong>: Over <strong>75%</strong> of internal combustion vehicles cluster in the <strong>1.5L–1.6L tier</strong> to avoid Egypt's steep customs tariff increase on engines exceeding 1,600 cc.</li>
+<li><strong>The Turbocharging Advantage</strong>: Within this critical 1.5L–1.6L customs sweetspot, turbocharged engines produce a median of <strong>156 HP</strong> compared to <strong>109 HP</strong> for naturally aspirated engines (+43% power boost without incurring higher customs duties).</li>
+<li><strong>Specific Output Efficiency</strong>: Turbocharged engines achieve a median specific output of <strong>106.3 HP / Liter</strong> compared to <strong>68.9 HP / Liter</strong> for naturally aspirated engines (<strong>+54.3% specific output gain</strong>), explaining the universal market shift toward downsized 1.5L turbocharged powerplants.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart D4):</strong></p>
+<ul>
+<li><strong>Fleet Concentration</strong>: Over <strong>72%</strong> of the entire Egyptian used car market operates within the <strong>100 to 160 HP</strong> band, with a market median of <strong>123 HP</strong>.</li>
+<li><strong>Niche Power Segment</strong>: Vehicles exceeding <strong>250 HP</strong> constitute less than 5% of all listings, reflecting the rarity and extreme maintenance costs associated with large multi-cylinder powerplants in Egypt.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart D5):</strong></p>
+<ul>
+<li><strong>Commercial Diesel Concentration</strong>: Gasoline powers over <strong>96%</strong> of Sedans and Hatchbacks. In sharp contrast, <strong>Vans</strong> have a <strong>28.3% Diesel</strong> share, reflecting commercial delivery requirements.</li>
+<li><strong>SUV Electrification Foothold</strong>: SUVs lead modern powertrain adoption, with Hybrid and Electric vehicles accounting for <strong>~3.2%</strong> of SUV listings compared to under <strong>1.1%</strong> in sedans.</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section E: Vehicle Condition &amp; Data Quality Diagnostics</h1>
+<p>We evaluate vehicle condition distributions, inspect the composite <code>Condition_Score</code> (0–10 scale), and audit data quality anomaly flags to establish operational boundaries for production dashboard deployment.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart E1):</strong></p>
+<ul>
+<li><strong>Dominance of Usable Fleet</strong>: <strong>Good</strong> (41.5%, 9,778 listings) and <strong>Fair</strong> (28.7%, 6,754 listings) constitute over <strong>70%</strong> of the entire used car inventory.</li>
+<li><strong>Pristine Rarity</strong>: Vehicles in <strong>Excellent</strong> condition represent only <strong>3.3%</strong> of the market (777 listings), commanding substantial scarcity premiums.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart E2):</strong></p>
+<ul>
+<li><strong>Multi-Modal Algorithmic Scoring</strong>: The composite <code>Condition_Score</code> reveals distinct modal peaks centered at ~3.3, 5.0, and 7.0, corresponding to discrete algorithmic thresholds computed during data cleaning based on age, mileage, trim, and physical attributes.</li>
+<li><strong>Median Integrity</strong>: The median score of <strong>4.7 / 10</strong> represents a road-worthy, moderate-mileage daily driver.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart E3):</strong></p>
+<ul>
+<li><strong>Cross-Segment Valuation Multipliers</strong>: Across every single body shape, moving from Poor to Excellent condition yields a steady 8x to 10x price appreciation.</li>
+<li><strong>SUV Premium Consistency</strong>: SUVs maintain a constant 30–50% median valuation premium over equivalent-condition Sedans across all condition tiers.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart E4):</strong></p>
+<ul>
+<li><strong>High Data Quality</strong>: Across the entire dataset of 23,535 listings, data anomalies are exceptionally rare:<ul>
+<li><strong>Imputed Engine Specs</strong>: 163 records (<strong>0.69%</strong>), where displacement or cylinder counts were missing in dealer scrapes and imputed from model trims.</li>
+<li><strong>Fuel-Engine Conflicts</strong>: 68 records (<strong>0.29%</strong>), involving minor discrepancies between advertised fuel types and engine configurations.</li>
+<li><strong>Zero-KM Listings</strong>: 37 records (<strong>0.16%</strong>), representing new dealer showroom stock posted onto used platforms.</li>
+<li><strong>Suspicious Mileage</strong>: 25 records (<strong>0.11%</strong>), where the mileage-to-age ratio (&lt;500 km/yr or &gt;60,000 km/yr) signals probable tampering or typo entries.</li>
+</ul>
+</li>
+<li><strong>Production Dashboard Recommendation</strong>: In a Streamlit dashboard, these records should not be deleted, but rather exposed as user-toggleable filters (e.g. <code>[x] Exclude Suspicious Mileage / Showroom Zero-KM</code>).</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section F: Global Geographic Intelligence (Brand Origins &amp; Regional Dynamics)</h1>
+<p>In this section, we explore the <strong>country of origin</strong> (<code>Brand_Origin</code>) across all 109 automotive manufacturers in Egypt. These 4 visual charts are specifically tailored for consumers and non-technical audiences, highlighting market share, pricing tiers, body style preferences, and fleet modernity.</p>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart F1):</strong></p>
+<ul>
+<li><strong>German Leadership</strong>: <strong>Germany</strong> leads the Egyptian secondary market with <strong>25.2% (5,932 listings)</strong>, propelled by widespread demand for Mercedes-Benz and BMW as capital-preservation assets.</li>
+<li><strong>Asian Commuter Block</strong>: <strong>South Korea (17.8%)</strong> and <strong>Japan (15.5%)</strong> together represent <strong>one-third of all vehicles</strong> on Egyptian roads (Hyundai, Kia, Toyota, Nissan, Mitsubishi), forming the reliable commuter foundation.</li>
+<li><strong>The Chinese Expansion</strong>: <strong>China (6.7%, 1,583 listings)</strong> has established a significant and rapidly growing footprint spanning 45 distinct brands.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart F2):</strong></p>
+<ul>
+<li><strong>Prestige Echelon</strong>: <strong>Germany (1,750,000 EGP)</strong> and <strong>Sweden (1,697,500 EGP)</strong> command the highest median price tags due to luxury brand concentrations (Porsche, BMW, Mercedes-Benz, Volvo).</li>
+<li><strong>The Mass-Market Sweetspot</strong>: <strong>South Korea (595,000 EGP)</strong>, <strong>Japan (590,000 EGP)</strong>, <strong>China (580,000 EGP)</strong>, and <strong>France (555,000 EGP)</strong> cluster tightly between 550k and 600k EGP, making them the most balanced budget-to-utility options for Egyptian families.</li>
+<li><strong>Accessible Local Entry</strong>: Domestic Egyptian brands (<strong>Speranza &amp; Nasr at 230,000 EGP</strong>) represent the most accessible price tier in the secondary market.</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart F3):</strong></p>
+<ul>
+<li><strong>China Leads the SUV Wave</strong>: Unlike any other manufacturing origin, <strong>China specializes heavily in SUVs (45.8%)</strong> over Sedans (37.3%). Chinese brands successfully entered Egypt by targeting high ground clearance crossovers at accessible price points (e.g. Chery Tiggo, MG ZS/RX5, Haval).</li>
+<li><strong>Japan &amp; Germany Specialize in Sedans</strong>: Japanese (<strong>61.9%</strong>) and German (<strong>61.0%</strong>) fleets are heavily centered around executive and commuter sedans (Sunny, Corolla, C-Class, 3-Series).</li>
+<li><strong>France &amp; Korea in Compact Hatchbacks</strong>: French (<strong>18.8%</strong>) and South Korean (<strong>17.5%</strong>) manufacturers hold the largest share in urban compact hatchbacks (Megane, Sandero, Picanto).</li>
+</ul>
+</div>
+<div class="markdown-cell"><p><strong>Analytical Takeaway (Chart F4):</strong></p>
+<ul>
+<li><strong>Modern Waves</strong>: <strong>China (5 years)</strong> and <strong>Sweden (6 years)</strong> represent the newest vehicles on Egyptian roads, reflecting recent market adoption, modern touchscreens, and active dealership warranties.</li>
+<li><strong>The Resilient Core Fleet</strong>: <strong>Japan (10 years)</strong> and <strong>South Korea (12 years)</strong> reflect longstanding durability—these vehicles remain primary daily commuters for over a decade due to cheap replacement parts and high mechanical reliability.</li>
+<li><strong>Legacy Budget Workhorses</strong>: <strong>Egypt (16 years)</strong> and <strong>Italy (16 years)</strong> populate the budget secondary market (Speranza, Fiat 128/Uno/Siena), providing essential ultra-low-cost transportation.</li>
+</ul>
+</div>
+<div class="markdown-cell"><hr />
+<h1>Section G: Executive Summary &amp; Strategic Insights</h1>
+<h3>🏆 Top 5 Strategic Discoveries</h3>
+<ol>
+<li><p><strong>Macroeconomic Inflation Hedging &amp; The Egyptian Depreciation Curve</strong>:</p>
+<ul>
+<li>In mature Western automotive markets, depreciation is monotonic and continuous toward zero. In Egypt, high import tariffs, domestic inflation, and foreign exchange currency devaluations transform used cars into tangible capital preservation instruments.</li>
+<li>After an initial depreciation during the first 3 to 5 years, older vehicles (aged 10–25 years) plateau into an inflation-hedged price floor, often maintaining or increasing their nominal EGP valuation over multi-year holding periods.</li>
+</ul>
+</li>
+<li><p><strong>The 1,600 cc Engine Displacement Tax Sweet Spot</strong>:</p>
+<ul>
+<li>Egyptian customs duties scale dramatically above 1,600 cc. As a result, over <strong>75% of all ICE vehicles</strong> are concentrated precisely at or below 1,600 cc.</li>
+<li>Modern forced-induction turbocharging has completely decoupled power from displacement: 1.5L turbocharged engines routinely produce <strong>150 to 220 HP</strong>, providing consumer performance without triggering higher vehicle licensing taxes.</li>
+</ul>
+</li>
+<li><p><strong>Bimodal Market Segmentation &amp; Brand Liquidity</strong>:</p>
+<ul>
+<li>The secondary market is polarized between two distinct liquidity poles:<ul>
+<li><strong>Mass Commuter Liquidity</strong>: Nissan Sunny, Hyundai Elantra, Toyota Corolla, and Mitsubishi Lancer provide dependable family utility with ultra-fast turnover and minimal liquidity risk.</li>
+<li><strong>Affluent Capital Liquidity</strong>: Mercedes-Benz (2,319 listings) and BMW (1,509 listings) account for over 16% of all listings. Prestige German sedans and SUVs serve as secondary liquid stores of wealth for upper-tier households.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Skewness &amp; The Necessity of Median-Centric Valuations</strong>:</p>
+<ul>
+<li>The overall market arithmetic mean price (<strong>1,326,711 EGP</strong>) is heavily distorted by ultra-luxury exotics (up to 36,000,000 EGP). The median price of <strong>700,000 EGP</strong> accurately reflects actual market clearing valuations for median consumers.</li>
+<li>Any production predictive pricing algorithm or dashboard must operate on $\log_{10}(\text{Price})$ to achieve symmetrical error distributions.</li>
+</ul>
+</li>
+<li><p><strong>Data Quality Integrity for Streamlit Deployment</strong>:</p>
+<ul>
+<li>Total anomalous listings across suspicious mileage, zero-km showroom stock, and specification conflicts represent <strong>less than 1.25%</strong> of the entire dataset.</li>
+<li>For interactive Streamlit dashboarding, these engineered flags provide powerful end-user controls, allowing users to toggle between strict certified listings and unconstrained dealer scrapes.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3>🚀 Streamlit Dashboard Architecture Recommendations</h3>
+<ol>
+<li><strong>Interactive Deal Hunter Tab</strong>:<ul>
+<li>Plot vehicles along the <strong>Car Age vs. Price</strong> and <strong>Mileage vs. Price</strong> regression curves, highlighting undervalued listings (residuals $&lt; -1.5\sigma$) as &quot;High-Value Deals&quot;.</li>
+</ul>
+</li>
+<li><strong>Dynamic Price Estimator Tool</strong>:<ul>
+<li>Provide user sliders for Brand, Model, Year, Mileage, and Condition Rating, computing the predicted median valuation and IQR confidence interval in real-time.</li>
+</ul>
+</li>
+<li><strong>Data Quality Filter Pane</strong>:<ul>
+<li>Provide sidebar checkboxes for <code>Exclude Suspicious Mileage</code>, <code>Exclude Zero-KM Showroom Stock</code>, and <code>Exclude Imputed Specs</code>.</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="markdown-cell"><hr />
+<h2>Automated HTML Export Verification</h2>
+<p>We verify that all interactive Plotly charts have been exported as standalone HTML files in the export folder.</p>
+</div>
+</body></html>
